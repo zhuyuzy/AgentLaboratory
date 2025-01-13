@@ -159,10 +159,31 @@ def query_model(model_str, prompt, system_prompt, openai_api_key=None, anthropic
                     completion = client.chat.completions.create(
                         model="o1-preview", messages=messages)
                 answer = completion.choices[0].message.content
+            elif model_str == "qwen-7b":
+                messages = [
+                    {"role": "system", "content": system_prompt},
+                    {"role": "user", "content": prompt}
+                ]
+                client = OpenAI(
+                    base_url="http://localhost:8000/v1",  # 假设VLLM在本地8000端口运行
+                    api_key="dummy"  # VLLM不需要实际的API key
+                )
+                if temp is None:
+                    completion = client.chat.completions.create(
+                        model="qwen-7b",
+                        messages=messages
+                    )
+                else:
+                    completion = client.chat.completions.create(
+                        model="qwen-7b",
+                        messages=messages,
+                        temperature=temp
+                    )
+                answer = completion.choices[0].message.content
 
             if model_str in ["o1-preview", "o1-mini", "claude-3.5-sonnet", "o1"]:
                 encoding = tiktoken.encoding_for_model("gpt-4o")
-            elif model_str in ["deepseek-chat"]:
+            elif model_str in ["deepseek-chat", "qwen-7b"]:
                 encoding = tiktoken.encoding_for_model("cl100k_base")
             else:
                 encoding = tiktoken.encoding_for_model(model_str)
